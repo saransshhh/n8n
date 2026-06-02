@@ -26,11 +26,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
+        320,
         -64
       ],
-      "id": "ec1833b8-31ee-4449-92ca-87fe00057436",
-      "name": "Code in JavaScript"
+      "id": "9434560d-09c2-417d-a9f9-d6832821f83b",
+      "name": "code"
     },
     {
       "parameters": {
@@ -39,11 +39,11 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        320,
+        80,
         -64
       ],
-      "id": "9434560d-09c2-417d-a9f9-d6832821f83b",
-      "name": "code"
+      "id": "ec1833b8-31ee-4449-92ca-87fe00057436",
+      "name": "code2"
     }
   ],
   "connections": {
@@ -51,14 +51,14 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript",
+            "node": "code2",
             "type": "main",
             "index": 0
           }
         ]
       ]
     },
-    "Code in JavaScript": {
+    "code2": {
       "main": [
         [
           {
@@ -75,7 +75,7 @@
     "binaryMode": "separate"
   },
   "triggerCount": 1,
-  "versionId": "265624b6-2178-4ed0-9e97-bc2988cb70e7",
+  "versionId": "0caabfc7-7949-4421-87ac-e53fb5aa72c2",
   "owner": {
     "type": "personal",
     "projectId": "HIoJuPZ4mKDFgufK",
