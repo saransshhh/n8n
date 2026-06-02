@@ -1,0 +1,60 @@
+name: Promote to Production
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  promote:
+    name: Activate prod workflow & deactivate dev workflow
+    runs-on: ubuntu-latest
+
+    steps:
+      # ------------------------------------------------------------------ #
+      # 1. Activate the workflow on the PRODUCTION n8n instance             #
+      # ------------------------------------------------------------------ #
+      - name: Activate production workflow
+        run: |
+          curl --fail-with-body -s -X PATCH \
+            "${{ secrets.N8N_PROD_URL }}/api/v1/workflows/${{ secrets.N8N_PROD_WORKFLOW_ID }}" \
+            -H "accept: application/json" \
+            -H "Content-Type: application/json" \
+            -H "X-N8N-API-KEY: ${{ secrets.N8N_PROD_API_KEY }}" \
+            -d '{"active": true}'
+
+      # ------------------------------------------------------------------ #
+      # 2. Deactivate the workflow on the DEVELOP n8n instance              #
+      # ------------------------------------------------------------------ #
+      - name: Deactivate develop workflow
+        run: |
+          curl --fail-with-body -s -X PATCH \
+            "${{ secrets.N8N_DEV_URL }}/api/v1/workflows/${{ secrets.N8N_DEV_WORKFLOW_ID }}" \
+            -H "accept: application/json" \
+            -H "Content-Type: application/json" \
+            -H "X-N8N-API-KEY: ${{ secrets.N8N_DEV_API_KEY }}" \
+            -d '{"active": false}'
+
+      # ------------------------------------------------------------------ #
+      # 3. Verify both changes                                              #
+      # ------------------------------------------------------------------ #
+      - name: Verify production workflow is active
+        run: |
+          STATUS=$(curl --fail-with-body -s \
+            "${{ secrets.N8N_PROD_URL }}/api/v1/workflows/${{ secrets.N8N_PROD_WORKFLOW_ID }}" \
+            -H "accept: application/json" \
+            -H "X-N8N-API-KEY: ${{ secrets.N8N_PROD_API_KEY }}" \
+            | jq -r '.active')
+          echo "Production workflow active: $STATUS"
+          [ "$STATUS" = "true" ] || (echo "ERROR: Production workflow is not active!" && exit 1)
+
+      - name: Verify develop workflow is inactive
+        run: |
+          STATUS=$(curl --fail-with-body -s \
+            "${{ secrets.N8N_DEV_URL }}/api/v1/workflows/${{ secrets.N8N_DEV_WORKFLOW_ID }}" \
+            -H "accept: application/json" \
+            -H "X-N8N-API-KEY: ${{ secrets.N8N_DEV_API_KEY }}" \
+            | jq -r '.active')
+          echo "Develop workflow active: $STATUS"
+          [ "$STATUS" = "false" ] || (echo "ERROR: Develop workflow is still active!" && exit 1)
