@@ -43,7 +43,7 @@
         -64
       ],
       "id": "9434560d-09c2-417d-a9f9-d6832821f83b",
-      "name": "Code in JavaScript1"
+      "name": "code"
     }
   ],
   "connections": {
@@ -62,7 +62,7 @@
       "main": [
         [
           {
-            "node": "Code in JavaScript1",
+            "node": "code",
             "type": "main",
             "index": 0
           }
@@ -75,7 +75,7 @@
     "binaryMode": "separate"
   },
   "triggerCount": 1,
-  "versionId": "89c62ca3-94b8-441e-be2b-332fb3d9a2b2",
+  "versionId": "265624b6-2178-4ed0-9e97-bc2988cb70e7",
   "owner": {
     "type": "personal",
     "projectId": "HIoJuPZ4mKDFgufK",
