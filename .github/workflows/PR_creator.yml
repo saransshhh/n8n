@@ -81,15 +81,19 @@ jobs:
             body="${body}
           ---
           _Auto-generated PR from develop_"
-            existing=$(gh pr list --head "$branch" --json number --jq '.[0].number')
+            existing=$(gh pr list --head "$branch" --json number --jq '.[0].number' || true)
             if [ -z "$existing" ]; then
-              gh pr create \
+              if ! gh pr create \
                 --title "Update: ${workflow_name}" \
                 --body "$body" \
                 --base main \
-                --head "$branch"
+                --head "$branch"; then
+                echo "Warning: Failed to create PR for $branch (likely restricted GitHub Actions PR permissions)."
+              fi
             else
-              gh pr edit "$existing" --body "$body"
+              if ! gh pr edit "$existing" --body "$body"; then
+                echo "Warning: Failed to update PR #$existing for $branch (likely restricted GitHub Actions PR permissions)."
+              fi
             fi
             git checkout develop
           done
@@ -106,13 +110,15 @@ jobs:
           git commit -m "Sync tags.json"
           git push -f origin auto/tags-sync
 
-          existing=$(gh pr list --head "auto/tags-sync" --json number --jq '.[0].number')
+          existing=$(gh pr list --head "auto/tags-sync" --json number --jq '.[0].number' || true)
           if [ -z "$existing" ]; then
-            gh pr create \
+            if ! gh pr create \
               --title "Sync: tags.json" \
               --body "Auto-sync tags metadata from develop" \
               --base main \
-              --head auto/tags-sync
+              --head auto/tags-sync; then
+              echo "Warning: Failed to create PR for auto/tags-sync (likely restricted GitHub Actions PR permissions)."
+            fi
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -127,13 +133,15 @@ jobs:
           git commit -m "Sync folders.json"
           git push -f origin auto/folders-sync
 
-          existing=$(gh pr list --head "auto/folders-sync" --json number --jq '.[0].number')
+          existing=$(gh pr list --head "auto/folders-sync" --json number --jq '.[0].number' || true)
           if [ -z "$existing" ]; then
-            gh pr create \
+            if ! gh pr create \
               --title "Sync: folders.json" \
               --body "Auto-sync folder metadata from develop" \
               --base main \
-              --head auto/folders-sync
+              --head auto/folders-sync; then
+              echo "Warning: Failed to create PR for auto/folders-sync (likely restricted GitHub Actions PR permissions)."
+            fi
           fi
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
