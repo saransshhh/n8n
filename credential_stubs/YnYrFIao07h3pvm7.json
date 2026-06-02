@@ -1,0 +1,15 @@
+{
+  "id": "YnYrFIao07h3pvm7",
+  "name": "Google Gemini(PaLM) Api account",
+  "type": "googlePalmApi",
+  "data": {
+    "apiKey": ""
+  },
+  "ownedBy": {
+    "type": "personal",
+    "projectId": "HIoJuPZ4mKDFgufK",
+    "projectName": "Saransh Sharma <saransh.sharma@aven.com>",
+    "personalEmail": "saransh.sharma@aven.com"
+  },
+  "isGlobal": false
+}
