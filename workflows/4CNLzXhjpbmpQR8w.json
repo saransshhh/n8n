@@ -1,25 +1,22 @@
 {
-  "id": "jg7guRKj0rzz57Ys",
-  "name": "test",
+  "id": "4CNLzXhjpbmpQR8w",
+  "name": "test 2",
   "nodes": [
     {
       "parameters": {
         "rule": {
           "interval": [
-            {
-              "field": "minutes",
-              "minutesInterval": 10
-            }
+            {}
           ]
         }
       },
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        -208,
-        0
+        -144,
+        -64
       ],
-      "id": "6dec9084-b3a4-4f15-ba75-fa0ba5583ce1",
+      "id": "12d590a0-0e7c-459f-987d-335eb9f434ab",
       "name": "Schedule Trigger"
     },
     {
@@ -29,11 +26,24 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        0,
-        0
+        80,
+        -64
       ],
-      "id": "abbc695c-115f-4574-b6d0-96e82a96f1b5",
+      "id": "ec1833b8-31ee-4449-92ca-87fe00057436",
       "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        320,
+        -64
+      ],
+      "id": "9434560d-09c2-417d-a9f9-d6832821f83b",
+      "name": "Code in JavaScript1"
     }
   ],
   "connections": {
@@ -47,6 +57,17 @@
           }
         ]
       ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -54,7 +75,7 @@
     "binaryMode": "separate"
   },
   "triggerCount": 1,
-  "versionId": "e0681478-118e-40c7-920e-f5b378b812fe",
+  "versionId": "89c62ca3-94b8-441e-be2b-332fb3d9a2b2",
   "owner": {
     "type": "personal",
     "projectId": "HIoJuPZ4mKDFgufK",
