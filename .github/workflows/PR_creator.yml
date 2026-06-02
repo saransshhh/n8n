@@ -12,104 +12,75 @@ jobs:
       pull-requests: write
 
     steps:
-      - name: Generate App Token
-        id: app-token
-        uses: actions/create-github-app-token@v1
-        with:
-          app-id: ${{ secrets.APP_ID }}
-          private-key: ${{ secrets.APP_PRIVATE_KEY }}
-
       - uses: actions/checkout@v4
         with:
           ref: develop
           fetch-depth: 0
-          token: ${{ steps.app-token.outputs.token }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Configure git
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git fetch origin main
-
       - name: Create per-workflow PRs
         run: |
           # ── FIX 1: only look at files changed in THIS push ──
           before="${{ github.event.before }}"
           after="${{ github.event.after }}"
-
           # Handle very first push to the branch (before is all zeros)
           if [[ "$before" =~ ^0+$ ]]; then
             changed_files=$(git diff --name-only origin/main -- 'workflows/*.json')
           else
             changed_files=$(git diff --name-only "$before" "$after" -- 'workflows/*.json')
           fi
-
           if [ -z "$changed_files" ]; then
             echo "No workflow changes in this push"
             exit 0
           fi
-
-          # pusher_name="$(git log -1 --format='%an' develop)"
-          # pusher_email="$(git log -1 --format='%ae' develop)"
-          # commit_msg="$(git log -1 --format='%s' develop)"
-
           echo "$changed_files" | while read file; do
             [ -z "$file" ] && continue
             workflow_id="$(basename "$file" .json)"
             branch="auto/${workflow_id}"
-
             # ── FIX 2: per-file author + commit message ──
             last_sha=$(git log -1 --format='%H' develop -- "$file")
             pusher_name=$(git log -1 --format='%an' "$last_sha")
             pusher_email=$(git log -1 --format='%ae' "$last_sha")
             commit_msg=$(git log -1 --format='%s' "$last_sha")
-
             git checkout -B "$branch" origin/main
             git checkout develop -- "$file"
-
             workflow_name="$(jq -r '.name // empty' "$file")"
             if [ -z "$workflow_name" ]; then
               workflow_name="$workflow_id"
             fi
-
             node_count="$(jq '.nodes | length' "$file" 2>/dev/null || echo "unknown")"
             node_types="$(jq -r '[.nodes[].type] | unique | map(split(".") | last) | join(", ")' "$file" 2>/dev/null || echo "")"
             trigger_node="$(jq -r '.nodes[] | select(.type | test("trigger|webhook"; "i")) | .type | split(".") | last' "$file" 2>/dev/null | head -1 || echo "")"
-
             git add "$file"
             git config user.name "$pusher_name"
             git config user.email "$pusher_email"
             git commit -m "Update workflow: ${workflow_name}" || { git checkout develop; continue; }
-
             # ── FIX 3 (optional): skip force-push if remote branch already matches ──
             if git fetch origin "$branch" 2>/dev/null && git diff --quiet "origin/$branch" HEAD; then
               echo "No change for $branch, skipping push"
               git checkout develop
               continue
             fi
-
             git push -f origin "$branch"
-
             body="## Workflow: ${workflow_name}
-
           **Pushed by:** ${pusher_name}
           **Commit:** ${commit_msg}
           **File:** \`${file}\`
-
           ### Workflow Details
           - **Nodes:** ${node_count}
           - **Node types:** ${node_types}"
-
             if [ -n "$trigger_node" ]; then
               body="${body}
           - **Trigger:** ${trigger_node}"
             fi
-
             body="${body}
-
           ---
           _Auto-generated PR from develop_"
-
             existing=$(gh pr list --head "$branch" --json number --jq '.[0].number')
             if [ -z "$existing" ]; then
               gh pr create \
@@ -120,11 +91,10 @@ jobs:
             else
               gh pr edit "$existing" --body "$body"
             fi
-
             git checkout develop
           done
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync tags.json via PR
         run: |
@@ -145,7 +115,7 @@ jobs:
               --head auto/tags-sync
           fi
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Sync folders.json via PR
         run: |
@@ -166,4 +136,4 @@ jobs:
               --head auto/folders-sync
           fi
         env:
-          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
