@@ -1,0 +1,63 @@
+{
+  "id": "dhVLL9roysh8vx73",
+  "name": "ishan test",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {}
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        0,
+        0
+      ],
+      "id": "28617a93-3e02-4831-a9e6-88b9ba9c9e96",
+      "name": "Schedule Trigger"
+    },
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        240,
+        -16
+      ],
+      "id": "3e61827b-1ff3-46f2-a823-5f9aa5631014",
+      "name": "Code in JavaScript"
+    }
+  ],
+  "connections": {
+    "Schedule Trigger": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "triggerCount": 1,
+  "versionId": "0754f3e7-a373-4a16-8c92-00e95edfc713",
+  "owner": {
+    "type": "personal",
+    "projectId": "HIoJuPZ4mKDFgufK",
+    "projectName": "Saransh Sharma <saransh.sharma@aven.com>",
+    "personalEmail": "saransh.sharma@aven.com"
+  },
+  "parentFolderId": null,
+  "isArchived": false
+}
