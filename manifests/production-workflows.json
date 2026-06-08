@@ -1,0 +1,26 @@
+{
+  "schemaVersion": "2.0",
+  "description": "Source of truth for which workflows are allowed in production. CI blocks any prod-main PR whose workflow files do not match this manifest.",
+  "updatedAt": "2026-06-08T00:00:00Z",
+  "productionWorkflows": [
+    {
+      "id": "REPLACE_WITH_WORKFLOW_ID",
+      "name": "Example Workflow",
+      "path": "workflows/REPLACE_WITH_WORKFLOW_ID.json",
+      "owner": "automation",
+      "ownerEmail": "automation@yourco.com",
+      "project": "default",
+      "folder": "",
+      "tags": ["prod"],
+      "publishPolicy": "published",
+      "criticality": "medium",
+      "requiredCredentials": [],
+      "requiredVariables": [],
+      "webhookPaths": [],
+      "changeWindow": "anytime",
+      "approvers": ["@release-owners"],
+      "lastReleasedCommit": "",
+      "addedAt": "2026-06-08T00:00:00Z"
+    }
+  ]
+}
