@@ -1,0 +1,17 @@
+# CODEOWNERS - required reviewers per path.
+# Replace the placeholder teams/users with real GitHub handles, e.g. @saranssshhh
+# or an org team like @your-org/release-owners.
+#
+# NOTE: CODEOWNERS only ENFORCES review when combined with branch protection
+# ("Require review from Code Owners"). Configure that in repo Settings.
+
+# Production branch promotion artifacts - require release owners
+/manifests/                      @REPLACE-release-owners
+/.github/workflows/              @REPLACE-release-owners
+/scripts/                        @REPLACE-release-owners
+
+# Workflow JSON - require workflow reviewers
+/workflows/                      @REPLACE-workflow-reviewers
+
+# Credential / variable stubs - require ops review
+/credential_stubs/               @REPLACE-ops
