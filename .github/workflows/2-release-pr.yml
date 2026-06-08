@@ -46,7 +46,7 @@ jobs:
             echo ""
             echo "### Deployment effect"
             echo "On merge, GitHub Actions calls n8n-prod source-control pull with:"
-            echo '\`{ "force": true, "autoPublish": "published" }\`'
+            echo '`{ "force": true, "autoPublish": "published" }`'
             echo ""
             echo "### Pre-merge checklist"
             echo "- [ ] Required prod credentials/variables provisioned for any NEW workflows"
@@ -66,7 +66,7 @@ jobs:
           if [ -z "$PR" ]; then
             gh pr create --base prod-main --head develop \
               --title "Release: develop -> prod-main" \
-              --body-file release-body.md --label release || echo "release PR create failed"
+              --body-file release-body.md || echo "release PR create failed"
           else
             gh pr edit "$PR" --body-file release-body.md || echo "release PR update failed"
           fi
