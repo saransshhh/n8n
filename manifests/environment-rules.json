@@ -1,0 +1,33 @@
+{
+  "schemaVersion": "1.0",
+  "description": "Environment promotion rules consumed by validation scripts and GitHub Actions. Tune these to your org policy.",
+  "branches": {
+    "ingress": "develop-sub",
+    "integration": "develop",
+    "production": "prod-main"
+  },
+  "validation": {
+    "forbiddenUrlPatterns": [
+      "localhost",
+      "127.0.0.1",
+      "0.0.0.0",
+      "\\.local",
+      "\\.dev\\.",
+      "staging",
+      "ngrok"
+    ],
+    "forbiddenWebhookPathPatterns": ["test", "tmp", "debug"],
+    "requireWorkflowId": true,
+    "requireWorkflowName": true,
+    "oneWorkflowPerPrInto": "develop",
+    "batchLabel": "batch",
+    "archivedLabel": "archived-change",
+    "deleteLabel": "prod-delete-approved",
+    "newProdWorkflowLabel": "new-prod-workflow"
+  },
+  "deployment": {
+    "n8nPullForce": true,
+    "n8nAutoPublish": "published",
+    "concurrencyGroup": "deploy-prod"
+  }
+}

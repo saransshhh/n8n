@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "1.0",
+  "description": "Tombstone registry of intentionally deleted/retired workflows. CI blocks any PR that re-introduces a workflow file whose id appears here, preventing accidental resurrection of removed workflows in production.",
+  "updatedAt": "2026-06-08T00:00:00Z",
+  "deletedWorkflows": [
+    {
+      "id": "EXAMPLE_DELETED_ID",
+      "name": "Example Retired Workflow",
+      "lastPath": "workflows/EXAMPLE_DELETED_ID.json",
+      "deletedAt": "2026-06-08T00:00:00Z",
+      "deletedBy": "ops",
+      "reason": "Replaced by customer-sync v2",
+      "approvedInPr": 0,
+      "removedFromProd": false,
+      "notes": "Set removedFromProd to true only after the workflow has been manually deleted in n8n-prod (Git deletion does NOT auto-delete in n8n)."
+    }
+  ]
+}
