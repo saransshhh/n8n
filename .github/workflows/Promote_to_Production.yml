@@ -1,0 +1,31 @@
+name: DEPRECATED - Promote to Production (manual only)
+
+# =====================================================================
+# DEPRECATED. Do not use for normal promotion.
+#
+# WHY: This workflow promoted by calling PATCH /api/v1/workflows/{id}
+# with {"active": true} on prod. That only flips the active flag on
+# WHATEVER version already exists in the prod database; it does NOT pull
+# the reviewed workflow JSON from Git. Production could therefore run a
+# stale version while appearing "deployed".
+#
+# REPLACEMENT: .github/workflows/3-deploy-prod.yml, which calls
+# POST /api/v1/source-control/pull with {"force": true,
+# "autoPublish": "published"} on merge to prod-main. That is the n8n-
+# documented mechanism that actually loads the approved Git state.
+#
+# This file is kept for reference only and is disabled from running
+# automatically (manual workflow_dispatch is a no-op guard).
+# =====================================================================
+
+on:
+  workflow_dispatch:
+
+jobs:
+  deprecated-guard:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Explain deprecation
+        run: |
+          echo "This workflow is deprecated. Use 3-deploy-prod.yml (source-control/pull)."
+          echo "See the comment header in this file for rationale."

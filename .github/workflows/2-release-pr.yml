@@ -1,0 +1,72 @@
+name: 2 - Release PR (develop -> prod-main)
+
+# Creates or updates a single release PR from the clean integration branch 'develop'
+# into the protected production branch 'prod-main'. This PR is the production gate:
+# a human reviews and merges it. This workflow NEVER pushes directly to prod-main.
+
+on:
+  push:
+    branches: [develop]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pull-requests: write
+
+concurrency:
+  group: release-pr
+  cancel-in-progress: true
+
+jobs:
+  release-pr:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate prod manifest invariant on develop
+        run: node scripts/check-production-manifest.js --branch develop || echo "::warning::manifest check reported issues (non-blocking on release-pr creation)"
+
+      - name: Build release summary
+        id: summary
+        run: |
+          set -uo pipefail
+          git fetch origin prod-main develop
+          changed=$(git diff --name-only origin/prod-main origin/develop -- 'workflows/*.json' 'tags.json' 'credential_stubs/*' || true)
+          {
+            echo "## Production Release"
+            echo ""
+            echo "**Promoting:** develop -> prod-main"
+            echo ""
+            echo "### Workflow / metadata files changed"
+            if [ -z "$changed" ]; then echo "_No file changes detected._"; else
+              echo "$changed" | sed 's/^/- /'
+            fi
+            echo ""
+            echo "### Deployment effect"
+            echo "On merge, GitHub Actions calls n8n-prod source-control pull with:"
+            echo '\`{ "force": true, "autoPublish": "published" }\`'
+            echo ""
+            echo "### Pre-merge checklist"
+            echo "- [ ] Required prod credentials/variables provisioned for any NEW workflows"
+            echo "- [ ] No hardcoded dev/localhost URLs"
+            echo "- [ ] Deletions/archivals carry the correct label and tombstone entry"
+            echo "- [ ] Rollback plan understood (revert this PR + re-run pull)"
+            echo ""
+            echo "_Auto-generated/updated by release-pr workflow._"
+          } > release-body.md
+
+      - name: Create or update release PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          PR=$(gh pr list --base prod-main --head develop --state open --json number --jq '.[0].number' || true)
+          if [ -z "$PR" ]; then
+            gh pr create --base prod-main --head develop \
+              --title "Release: develop -> prod-main" \
+              --body-file release-body.md --label release || echo "release PR create failed"
+          else
+            gh pr edit "$PR" --body-file release-body.md || echo "release PR update failed"
+          fi

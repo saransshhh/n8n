@@ -1,0 +1,112 @@
+name: 1 - Ingress split (develop-sub -> develop)
+
+# Splits raw n8n source-control pushes on develop-sub into one PR per workflow
+# into the clean integration branch 'develop'. Adapted from the original PR_creator.yml
+# but retargeted to the develop-sub -> develop model.
+
+on:
+  push:
+    branches: [develop-sub]
+    paths:
+      - 'workflows/**'
+      - 'tags.json'
+      - 'credential_stubs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+  pull-requests: write
+
+concurrency:
+  group: ingress-split
+  cancel-in-progress: false
+
+jobs:
+  split:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: develop-sub
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configure git
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git fetch origin develop
+
+      - name: Create per-workflow PRs into develop
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          before="${{ github.event.before }}"
+          after="${{ github.sha }}"
+          if [[ "$before" =~ ^0+$ ]] || [ -z "$before" ]; then
+            changed_files=$(git diff --name-only origin/develop -- 'workflows/*.json')
+          else
+            changed_files=$(git diff --name-only "$before" "$after" -- 'workflows/*.json')
+          fi
+          if [ -z "$changed_files" ]; then
+            echo "No workflow changes in this push"; exit 0
+          fi
+          echo "$changed_files" | while read -r file; do
+            [ -z "$file" ] && continue
+            workflow_id="$(basename "$file" .json)"
+            branch="auto/${workflow_id}"
+            last_sha=$(git log -1 --format='%H' develop-sub -- "$file")
+            pusher_name=$(git log -1 --format='%an' "$last_sha")
+            pusher_email=$(git log -1 --format='%ae' "$last_sha")
+            commit_msg=$(git log -1 --format='%s' "$last_sha")
+            git checkout -B "$branch" origin/develop
+            git checkout develop-sub -- "$file"
+            workflow_name="$(jq -r '.name // empty' "$file")"
+            [ -z "$workflow_name" ] && workflow_name="$workflow_id"
+            node_count="$(jq '.nodes | length' "$file" 2>/dev/null || echo unknown)"
+            git add "$file"
+            git config user.name "$pusher_name"
+            git config user.email "$pusher_email"
+            git commit -m "Update workflow: ${workflow_name}" || { git checkout develop-sub; continue; }
+            if git fetch origin "$branch" 2>/dev/null && git diff --quiet "origin/$branch" HEAD; then
+              echo "No change for $branch, skipping"; git checkout develop-sub; continue
+            fi
+            git push -f origin "$branch"
+            body="## Workflow: ${workflow_name}
+          **Pushed by:** ${pusher_name}
+          **Commit:** ${commit_msg}
+          **File:** \`${file}\`
+          **Nodes:** ${node_count}
+
+          ---
+          _Auto-generated PR: develop-sub -> develop_"
+            existing=$(gh pr list --head "$branch" --base develop --json number --jq '.[0].number' || true)
+            if [ -z "$existing" ]; then
+              gh pr create --title "Update: ${workflow_name}" --body "$body" \
+                --base develop --head "$branch" --label workflow || echo "PR create failed for $branch"
+            else
+              gh pr edit "$existing" --body "$body" || echo "PR update failed for $branch"
+            fi
+            git config user.name "github-actions[bot]"
+            git config user.email "github-actions[bot]@users.noreply.github.com"
+            git checkout develop-sub
+          done
+
+      - name: Sync tags.json into develop via PR
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -uo pipefail
+          git fetch origin develop
+          git checkout -B auto/tags-sync origin/develop
+          git checkout develop-sub -- tags.json || exit 0
+          git add tags.json
+          git diff --cached --quiet && echo "No tags changes" && exit 0
+          git commit -m "Sync tags.json"
+          git push -f origin auto/tags-sync
+          existing=$(gh pr list --head auto/tags-sync --base develop --json number --jq '.[0].number' || true)
+          if [ -z "$existing" ]; then
+            gh pr create --title "Sync: tags.json" --body "Auto-sync tags metadata from develop-sub" \
+              --base develop --head auto/tags-sync --label metadata || echo "tags PR create failed"
+          fi

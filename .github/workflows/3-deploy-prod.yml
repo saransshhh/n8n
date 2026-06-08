@@ -1,0 +1,77 @@
+name: 3 - Deploy to n8n-prod (prod-main pull)
+
+# On merge to prod-main, tell the production n8n instance to PULL the approved
+# Git state via the source-control pull API. This is the CORRECT mechanism per
+# n8n docs (POST /api/v1/source-control/pull) and replaces any approach that
+# only flips workflow 'active' state without pulling new workflow JSON.
+#
+# Defaults: force=true (Git is the source of truth) and autoPublish=published
+# (only re-publish workflows that are ALREADY published on prod; do not auto-
+# publish brand-new or archived workflows). n8n never auto-publishes archived
+# workflows regardless of this setting.
+
+on:
+  push:
+    branches: [prod-main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-prod
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: production   # add a required reviewer in repo Settings > Environments for an extra gate
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Trigger n8n-prod source-control pull
+        id: pull
+        env:
+          N8N_PROD_URL: ${{ secrets.N8N_PROD_URL }}
+          N8N_PROD_API_KEY: ${{ secrets.N8N_PROD_API_KEY }}
+        run: |
+          set -euo pipefail
+          echo "Calling source-control pull on n8n-prod..."
+          http_code=$(curl -sS -o pull-response.json -w "%{http_code}" \
+            --request POST \
+            --location "${N8N_PROD_URL}/api/v1/source-control/pull" \
+            --header "Content-Type: application/json" \
+            --header "X-N8N-API-KEY: ${N8N_PROD_API_KEY}" \
+            --data '{"force": true, "autoPublish": "published"}')
+          echo "HTTP $http_code"
+          cat pull-response.json || true
+          if [ "$http_code" -ge 400 ]; then
+            echo "::error::n8n-prod pull failed with HTTP $http_code"
+            exit 1
+          fi
+
+      - name: Report publish results
+        if: always()
+        run: |
+          echo "::group::Pull response"
+          cat pull-response.json 2>/dev/null || echo "(no response file)"
+          echo "::endgroup::"
+          # Surface any failed publishes if the response includes them.
+          if command -v jq >/dev/null 2>&1 && [ -f pull-response.json ]; then
+            failed=$(jq -r '..|objects|select(has("name") and has("error"))|.name' pull-response.json 2>/dev/null || true)
+            if [ -n "$failed" ]; then
+              echo "::warning::Some workflows failed to publish (likely missing credentials/variables):"
+              echo "$failed"
+            fi
+          fi
+
+      # Optional notification step. Configure SLACK_WEBHOOK_URL secret to enable.
+      - name: Notify Slack
+        if: always() && env.SLACK_WEBHOOK_URL != ''
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          STATUS: ${{ job.status }}
+        run: |
+          curl -sS -X POST -H 'Content-type: application/json' \
+            --data "{\"text\":\"n8n-prod deploy: ${STATUS} for ${{ github.sha }}\"}" \
+            "${SLACK_WEBHOOK_URL}" || true
