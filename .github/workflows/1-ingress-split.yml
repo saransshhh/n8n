@@ -3,6 +3,7 @@ name: 1 - Ingress split (develop-sub -> develop)
 # Splits raw n8n source-control pushes on develop-sub into one PR per workflow
 # into the clean integration branch 'develop'. Each push creates a NEW PR per
 # changed workflow using a unique branch name (auto/<id>-<short-sha>).
+# Detects NEW vs UPDATE by checking if the file already exists on develop.
 
 on:
   push:
@@ -61,6 +62,11 @@ jobs:
             pusher_name=$(git log -1 --format='%an' "$last_sha")
             pusher_email=$(git log -1 --format='%ae' "$last_sha")
             commit_msg=$(git log -1 --format='%s' "$last_sha")
+            if git cat-file -e "origin/develop:$file" 2>/dev/null; then
+              change_type="UPDATE"
+            else
+              change_type="NEW"
+            fi
             git checkout -B "$branch" origin/develop
             git checkout develop-sub -- "$file"
             workflow_name="$(jq -r '.name // empty' "$file")"
@@ -69,10 +75,16 @@ jobs:
             git add "$file"
             git config user.name "$pusher_name"
             git config user.email "$pusher_email"
-            git commit -m "Update workflow: ${workflow_name} (${short_sha})" --allow-empty
+            if git diff --cached --quiet; then
+              has_diff="no"
+              git commit -m "${change_type} workflow: ${workflow_name} (${short_sha}) [no content change]" --allow-empty
+            else
+              has_diff="yes"
+              git commit -m "${change_type} workflow: ${workflow_name} (${short_sha})"
+            fi
             git push -f origin "$branch"
-            body="$(printf '## Workflow: %s\n**Pushed by:** %s\n**Commit:** %s\n**Source SHA:** %s\n**File:** %s\n**Nodes:** %s\n\n---\n_Auto-generated PR: develop-sub -> develop_' "$workflow_name" "$pusher_name" "$commit_msg" "$short_sha" "$file" "$node_count")"
-            gh pr create --title "Update: ${workflow_name} (${short_sha})" --body "$body" \
+            body="$(printf '## %s: %s\n**Pushed by:** %s\n**Commit:** %s\n**Source SHA:** %s\n**File:** %s\n**Nodes:** %s\n**Content changed vs develop:** %s\n\n---\n_Auto-generated PR: develop-sub -> develop. Merging overlays the pushed version onto develop._' "$change_type" "$workflow_name" "$pusher_name" "$commit_msg" "$short_sha" "$file" "$node_count" "$has_diff")"
+            gh pr create --title "${change_type}: ${workflow_name} (${short_sha})" --body "$body" \
               --base develop --head "$branch" || echo "PR create failed for $branch"
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
