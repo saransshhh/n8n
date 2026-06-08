@@ -71,14 +71,7 @@ jobs:
             git config user.email "$pusher_email"
             git commit -m "Update workflow: ${workflow_name} (${short_sha})" --allow-empty
             git push -f origin "$branch"
-            body="## Workflow: ${workflow_name}
-          **Pushed by:** ${pusher_name}
-          **Commit:** ${commit_msg}
-          **Source SHA:** ${short_sha}
-          **File:** `${file}`
-          **Nodes:** ${node_count}
-          ---
-          _Auto-generated PR: develop-sub -> develop_"
+            body="$(printf '## Workflow: %s\n**Pushed by:** %s\n**Commit:** %s\n**Source SHA:** %s\n**File:** %s\n**Nodes:** %s\n\n---\n_Auto-generated PR: develop-sub -> develop_' "$workflow_name" "$pusher_name" "$commit_msg" "$short_sha" "$file" "$node_count")"
             gh pr create --title "Update: ${workflow_name} (${short_sha})" --body "$body" \
               --base develop --head "$branch" --label workflow || echo "PR create failed for $branch"
             git config user.name "github-actions[bot]"
