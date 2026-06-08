@@ -73,7 +73,7 @@ jobs:
             git push -f origin "$branch"
             body="$(printf '## Workflow: %s\n**Pushed by:** %s\n**Commit:** %s\n**Source SHA:** %s\n**File:** %s\n**Nodes:** %s\n\n---\n_Auto-generated PR: develop-sub -> develop_' "$workflow_name" "$pusher_name" "$commit_msg" "$short_sha" "$file" "$node_count")"
             gh pr create --title "Update: ${workflow_name} (${short_sha})" --body "$body" \
-              --base develop --head "$branch" --label workflow || echo "PR create failed for $branch"
+              --base develop --head "$branch" || echo "PR create failed for $branch"
             git config user.name "github-actions[bot]"
             git config user.email "github-actions[bot]@users.noreply.github.com"
             git checkout develop-sub
@@ -94,4 +94,4 @@ jobs:
           git commit -m "Sync tags.json (${short_sha})"
           git push -f origin "$tags_branch"
           gh pr create --title "Sync: tags.json (${short_sha})" --body "Auto-sync tags metadata from develop-sub" \
-            --base develop --head "$tags_branch" --label metadata || echo "tags PR create failed"
+            --base develop --head "$tags_branch" || echo "tags PR create failed"
