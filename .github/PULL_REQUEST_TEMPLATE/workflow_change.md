@@ -12,7 +12,7 @@
 - [ ] No hardcoded dev/localhost/staging URLs or test webhook paths
 - [ ] No unexpected credential/variable stub changes
 - [ ] Publish intent is correct (should this be published in prod?)
-- [ ] One workflow per PR (or has the \`batch\` label)
+- [ ] One workflow per PR (or has the `batch` label)
 
 ### Labels (apply as needed)
-- \`workflow\` (default) · \`batch\` · \`archived-change\` · \`prod-delete-approved\` · \`new-prod-workflow\`
+`workflow` (default) - `batch` - `archived-change` - `prod-delete-approved` - `new-prod-workflow`
