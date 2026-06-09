@@ -31,6 +31,29 @@
       ],
       "id": "3e61827b-1ff3-46f2-a823-5f9aa5631014",
       "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "bd958c9c-8ab7-4cd5-b3fa-faaecfae97ec",
+              "name": "name",
+              "value": "value",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        448,
+        -16
+      ],
+      "id": "3b1afbf3-8f04-475b-bc4d-4ea9d859f8ca",
+      "name": "Edit Fields"
     }
   ],
   "connections": {
@@ -44,6 +67,17 @@
           }
         ]
       ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
     }
   },
   "settings": {
@@ -51,7 +85,7 @@
     "binaryMode": "separate"
   },
   "triggerCount": 1,
-  "versionId": "0754f3e7-a373-4a16-8c92-00e95edfc713",
+  "versionId": "70a28b4f-3584-4559-88d1-815d49c33e5e",
   "owner": {
     "type": "personal",
     "projectId": "HIoJuPZ4mKDFgufK",
