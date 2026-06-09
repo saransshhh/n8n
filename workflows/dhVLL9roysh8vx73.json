@@ -13,8 +13,8 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        0,
-        0
+        -96,
+        -32
       ],
       "id": "28617a93-3e02-4831-a9e6-88b9ba9c9e96",
       "name": "Schedule Trigger"
@@ -26,8 +26,8 @@
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        240,
-        -16
+        160,
+        -32
       ],
       "id": "3e61827b-1ff3-46f2-a823-5f9aa5631014",
       "name": "Code in JavaScript"
@@ -49,8 +49,8 @@
       "type": "n8n-nodes-base.set",
       "typeVersion": 3.4,
       "position": [
-        448,
-        -16
+        384,
+        32
       ],
       "id": "3b1afbf3-8f04-475b-bc4d-4ea9d859f8ca",
       "name": "Edit Fields"
@@ -85,7 +85,7 @@
     "binaryMode": "separate"
   },
   "triggerCount": 1,
-  "versionId": "70a28b4f-3584-4559-88d1-815d49c33e5e",
+  "versionId": "e462e252-5933-4169-91a4-95ff480a1233",
   "owner": {
     "type": "personal",
     "projectId": "HIoJuPZ4mKDFgufK",
