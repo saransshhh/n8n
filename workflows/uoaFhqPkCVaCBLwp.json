@@ -1,7 +1,20 @@
 {
-  "id": "KbBl2nuGJVmRUJ0R",
-  "name": "saransh workflow",
+  "id": "uoaFhqPkCVaCBLwp",
+  "name": "diksha test",
   "nodes": [
+    {
+      "parameters": {
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        208,
+        0
+      ],
+      "id": "e0e6db23-cc28-4a46-83ed-8afc9d6fd349",
+      "name": "Code in JavaScript"
+    },
     {
       "parameters": {
         "rule": {
@@ -13,24 +26,11 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        288,
-        -16
+        0,
+        0
       ],
-      "id": "5087d0c0-344f-4f5a-886e-6d90547f7f1c",
+      "id": "6963d11d-8c7b-4bda-a242-8f9bd1f5b601",
       "name": "Schedule Trigger"
-    },
-    {
-      "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 2;\n}\n\nreturn $input.all();"
-      },
-      "type": "n8n-nodes-base.code",
-      "typeVersion": 2,
-      "position": [
-        80,
-        -16
-      ],
-      "id": "7983c67e-4399-476c-9202-f573c301cd17",
-      "name": "code"
     }
   ],
   "connections": {
@@ -38,7 +38,7 @@
       "main": [
         [
           {
-            "node": "code",
+            "node": "Code in JavaScript",
             "type": "main",
             "index": 0
           }
@@ -51,7 +51,7 @@
     "binaryMode": "separate"
   },
   "triggerCount": 1,
-  "versionId": "215b87cb-e895-443a-b181-04229c12014e",
+  "versionId": "e89c8e37-520b-4d64-8932-13a9bed121d5",
   "owner": {
     "type": "personal",
     "projectId": "HIoJuPZ4mKDFgufK",

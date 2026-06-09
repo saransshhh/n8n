@@ -1,6 +1,6 @@
 {
-  "id": "KbBl2nuGJVmRUJ0R",
-  "name": "saransh workflow",
+  "id": "pXQdKp97dQTGOAgV",
+  "name": "himan test",
   "nodes": [
     {
       "parameters": {
@@ -13,24 +13,24 @@
       "type": "n8n-nodes-base.scheduleTrigger",
       "typeVersion": 1.3,
       "position": [
-        288,
-        -16
+        0,
+        0
       ],
-      "id": "5087d0c0-344f-4f5a-886e-6d90547f7f1c",
+      "id": "39618b2e-fec9-4c82-9ee6-cb88c3ddcd36",
       "name": "Schedule Trigger"
     },
     {
       "parameters": {
-        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 2;\n}\n\nreturn $input.all();"
+        "jsCode": "// Loop over input items and add a new field called 'myNewField' to the JSON of each one\nfor (const item of $input.all()) {\n  item.json.myNewField = 1;\n}\n\nreturn $input.all();"
       },
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
       "position": [
-        80,
-        -16
+        240,
+        32
       ],
-      "id": "7983c67e-4399-476c-9202-f573c301cd17",
-      "name": "code"
+      "id": "a7e6fa2a-277e-4188-8462-3deee32f056d",
+      "name": "Code in JavaScript"
     }
   ],
   "connections": {
@@ -38,7 +38,7 @@
       "main": [
         [
           {
-            "node": "code",
+            "node": "Code in JavaScript",
             "type": "main",
             "index": 0
           }
@@ -51,7 +51,7 @@
     "binaryMode": "separate"
   },
   "triggerCount": 1,
-  "versionId": "215b87cb-e895-443a-b181-04229c12014e",
+  "versionId": "1762dba0-96fe-48d0-89cc-50c44a60968e",
   "owner": {
     "type": "personal",
     "projectId": "HIoJuPZ4mKDFgufK",
